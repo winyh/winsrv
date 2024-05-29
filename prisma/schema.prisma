@@ -1,0 +1,45 @@
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model admin {
+  id         Int      @id @default(autoincrement())
+  email      String   @unique
+  username   String   @unique
+  mobile     String   @unique
+  password   String?
+  token      String?  @db.LongText
+  avator     String?
+  status     String?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model record {
+  id         Int      @id @default(autoincrement())
+  username   String?
+  mobile     String?
+  company    String?
+  industry   String?
+  domain     String?  @db.LongText
+  domain_key String?
+  scale      String?  @db.LongText
+  scale_key  String?
+  start      String?  @db.LongText
+  start_key  String?
+  area       String?  @db.LongText
+  area_key   String?
+  person     String?  @db.LongText
+  person_key String?
+  focus      String?  @db.LongText
+  focus_key  String?
+  status     String?
+  mark       String?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
