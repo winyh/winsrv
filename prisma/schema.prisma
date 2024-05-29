@@ -9,15 +9,198 @@ generator client {
 
 model admin {
   id         Int      @id @default(autoincrement())
+  address_id Int?
   email      String   @unique
   username   String   @unique
   mobile     String   @unique
   password   String?
   token      String?  @db.LongText
   avator     String?
-  status     String?
+  sort       Int?
+  status     String?  @default("0") // 0禁用，1启用
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
+}
+
+model user {
+  id        Int     @id @default(autoincrement())
+  uid       String  @default(uuid())
+  role_id   Int?
+  email     String  @unique
+  username  String  @unique
+  nick_name String?
+  mobile    String  @unique
+  avator    String?
+  password  String?
+  token     String? @db.LongText
+  sort      Int?
+  status    String? @default("0") // 0禁用，1启用
+}
+
+model role {
+  id          Int      @id @default(autoincrement())
+  role_name   String?
+  role_code   String?  @unique
+  description String?
+  sort        Int?
+  status      String?  @default("0") // 0禁用，1启用
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+}
+
+// Permission 权限（基本请求是一个元组对象，至少需要主题(访问实体)、对象(访问资源) 和动作(访问方式) sub, obj, act）
+model permission {
+  id          Int      @id @default(autoincrement())
+  menu_id     Int // 菜单id 
+  role_id     Int // 角色id
+  name        String
+  description String?
+  subject     String // 访问实体，一般为角色
+  object      String // 访问资源，接口url, 页面路由路径path，页面元素element，具有唯一性
+  action      String // 访问方式， read, write, get，post, update, delete
+  type        String? // 权限类型：操作 action，元素 element（显示元素或按钮）
+  sort        Int?
+  status      String?  @default("0") // 0禁用，1启用
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+}
+
+model menu {
+  id                 Int      @id @default(autoincrement())
+  pid                Int?     @default(0) // 父级id
+  path               String // 菜单路径
+  name               String // 菜单名称
+  title              String // 菜单路径
+  icon               String? // 图标
+  component          String? // 挂载组件
+  hide_in_menu       String?  @default("0") // 子路由是否隐藏
+  hide_in_child_menu String?  @default("0") // 子路由是否隐藏
+  access             String? // 权限
+  authority          String? // 权限
+  level              String?  @default("0") // 0 层级
+  sort               Int?
+  status             String?  @default("1") // 0 状态
+  created_at         DateTime @default(now())
+  updated_at         DateTime @updatedAt
+}
+
+model role_menu {
+  id         Int      @id @default(autoincrement())
+  role_id    Int? // 角色id
+  menu_id    Int? // 菜单id
+  status     String?  @default("1") // 0 状态
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model CasbinRule {
+  id    Int     @id @default(autoincrement())
+  ptype String
+  v0    String?
+  v1    String?
+  v2    String?
+  v3    String?
+  v4    String?
+  v5    String?
+
+  @@map("casbin_rule")
+}
+
+// usert_auth 三方授权
+model user_auth {
+  id            Int      @id @default(autoincrement())
+  user_id       Int?
+  identity_type String? // 登录类型 (手机号/邮箱/用户名) 或第三方应用名称 (1.微信授权 2.支付宝 3.百度授权等)
+  identifier    String? // 标识 (手机号/邮箱/用户名或第三方应用的唯一标识)，如微信openid
+  credential    String? // 密码凭证 (站内的保存密码 , 站外的不保存或保存 token)
+  session_key   String? // 会话密钥：微信本次登录的会话密钥，登录失效时需要刷新，否则解密微信信息会失败
+  mobile        String // 当前平台绑定的用户手机号
+  union_id      String? // 开放平台下的不同应用：对同一个微信开放平台下的不同应用，UnionID是相同
+  cloud_id      String? // 云开发：敏感数据对应的云 ID，开通云开发的小程序才会返回
+  active        String? // 最近一次用什么登录的
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+}
+
+model address {
+  id            Int      @id @default(autoincrement())
+  user_id       Int?
+  user_name     String? // 用户名称
+  mobile        String?
+  province      String?
+  city          String?
+  district      String?
+  street        String?
+  province_code String?
+  city_code     String?
+  district_code String?
+  street_code   String?
+  detail        String?
+  sort          Int?
+  status        String?  @default("1") // 0 状态
+  is_default    String?  @default("0") // 是否默认地址,0非默认，1默认
+  longitude     Float // 精度
+  latitude      Float // 纬度
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+}
+
+model file {
+  id           Int      @id @default(autoincrement())
+  url          String? // 文件全地址
+  relative_url String? // 文件相对地址
+  name         String? // 文件名称
+  origin       String? // 文件原始本地名称
+  alt          String? // 文件缺省值
+  description  String?
+  category     String?
+  folder       String? // 文件夹名称
+  sort         Int?
+  status       String?  @default("1") // 0 状态
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+}
+
+model sms {
+  id            Int      @id @default(autoincrement())
+  domain        String? // 服务商域名
+  access_key    String? // 存储 Key
+  access_secret String? // 储存Key的密钥
+  signer        String? // 签名
+  template_code String? // 短信模板
+  is_default    String?  @default("0") // 是否默认地址,0非默认，1默认
+  status        String?  @default("1") // 0 状态
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+}
+
+model system {
+  id             Int      @id @default(autoincrement())
+  name           String? // 系统名称
+  work_time      String? // 工作时间
+  phone          String? // 客服电话
+  logo           String? // logo图标
+  slogan         String? // 宣传语
+  office_wx_code String? // 官方微信二维码
+  public_wx_code String? // 微信公众号
+  version        String? // 版本号
+  status         String?  @default("1") //  0 停服，1运行中
+  created_at     DateTime @default(now())
+  updated_at     DateTime @updatedAt
+}
+
+model dictionary {
+  id          Int      @id @default(autoincrement())
+  title       String? // 字典名称，给后台运营看的
+  description String? // 字典描述
+  icon        String? // 字典图标，可能用到
+  type        String? // 字典同属一类值type值相同，每一种类型代表一种情形
+  label       String? // 字典键，显示给前台用户看的
+  value       String? // 字典值，实际上传的值，同类型下唯一
+  sort        Int?
+  status      String?  @default("1") // 0今禁用，1启用
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
 }
 
 model record {
