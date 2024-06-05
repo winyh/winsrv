@@ -7,6 +7,20 @@ generator client {
   provider = "prisma-client-js"
 }
 
+model tenant {
+  id          Int       @id @default(autoincrement())
+  name        String?
+  description String?
+  icon        String?
+  contacts    String? // 联系人
+  mobile      String? // 手机号
+  sort        Int?
+  status      String?   @default("1") // 0禁用，1启用
+  expired_at  DateTime? // 到期时间
+  created_at  DateTime  @default(now()) // 购买时间
+  updated_at  DateTime  @updatedAt
+}
+
 model admin {
   id         Int      @id @default(autoincrement())
   address_id Int?
