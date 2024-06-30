@@ -12,6 +12,7 @@ model tenant {
   name        String?
   description String?
   icon        String?
+  subject     String? // 租户主体名称
   contacts    String? // 联系人
   mobile      String? // 手机号
   sort        Int?

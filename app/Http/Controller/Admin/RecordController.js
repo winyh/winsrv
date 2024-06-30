@@ -1,7 +1,7 @@
 import prisma from "../../../../prisma/client.js"
 import { QueryContains } from "../../../../prisma/tool.js"
 
-const RecordListController = async (req, res) => {
+const FindListRecordController = async (req, res) => {
   const { pageSize = 10, current = 1, start_at, end_at } = req.query
 
   const fields = [
@@ -51,7 +51,7 @@ const RecordListController = async (req, res) => {
   })
 }
 
-const RecordInfoController = async (req, res) => {
+const FindRecordController = async (req, res) => {
   const { id } = req.params
 
   const record = await prisma.record.findUnique({
@@ -154,8 +154,8 @@ const UpdateRecordController = async (req, res) => {
 }
 
 export {
-  RecordListController,
-  RecordInfoController,
+  FindListRecordController,
+  FindRecordController,
   RecordExportController,
   CreateRecordController,
   UpdateRecordController
