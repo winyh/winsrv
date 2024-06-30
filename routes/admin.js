@@ -21,7 +21,8 @@ import {
   UpdateTenantController,
   FindTenantController,
   FindAllTenantController,
-  FindListTenantController
+  FindListTenantController,
+  DataTenantController
 } from "../app/Http/Controller/Admin/TenantController.js"
 
 const adminRouter = express.Router()
@@ -47,8 +48,10 @@ adminRouter.put("/records/:id", UpdateRecordController) /* 问卷修改 */
 adminRouter.post("/tenant", CreateTenantController) /* 新增租户 */
 adminRouter.delete("/tenant", DestoryTenantController) /* 删除租户 */
 adminRouter.put("/tenant", UpdateTenantController) /* 修改租户 */
-adminRouter.get("/tenant/:id", FindTenantController) /* 查询租户:id */
+adminRouter.get("/tenants/:id", FindTenantController) /* 查询租户:id */
 adminRouter.get("/tenants", FindAllTenantController) /* 查询租户-所有 */
 adminRouter.get("/tenant/list", FindListTenantController) /* 查询租户-分页 */
+
+adminRouter.post("/tenant/data", DataTenantController) /* 租户数据 */
 
 export { adminRouter }

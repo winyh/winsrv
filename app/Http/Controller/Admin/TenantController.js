@@ -1,11 +1,13 @@
 import prisma from "../../../../prisma/client.js"
-import { QueryContains } from "../../../../prisma/tool.js"
+import { QueryContains, QueryTimeRange } from "../../../../prisma/tool.js"
+import { str2Arr } from "../../../../utils/index.js"
 
 const CreateTenantController = async (req, res) => {
   const {
     name,
     description,
     icon,
+    subject,
     contacts,
     mobile,
     sort,
@@ -19,6 +21,7 @@ const CreateTenantController = async (req, res) => {
         name,
         description,
         icon,
+        subject,
         contacts,
         mobile,
         sort,
@@ -44,12 +47,13 @@ const CreateTenantController = async (req, res) => {
 }
 
 const DestoryTenantController = async (req, res) => {
-  const { ids } = req.body
+  let { ids } = req.query
+  ids = str2Arr(ids)
   try {
     const result = await prisma.tenant.deleteMany({
       where: {
         id: {
-          contains: [...ids]
+          in: ids
         }
       }
     })
@@ -164,14 +168,7 @@ const FindAllTenantController = async (req, res) => {
 }
 
 const FindListTenantController = async (req, res) => {
-  const {
-    pageSize = 10,
-    current = 1,
-    start_at,
-    end_at,
-    expire_start_at,
-    expire_end_at
-  } = req.query
+  const { pageSize = 10, current = 1 } = req.query
 
   const fields = [
     "name",
@@ -184,35 +181,29 @@ const FindListTenantController = async (req, res) => {
   ]
 
   const queryFields = QueryContains(fields, req)
-
+  const queryTimeFields = QueryTimeRange(["created_at", "expired_at"], req)
   try {
-    const [Tenants, meta] = await prisma.Tenant.paginate({
-      where: {
-        ...queryFields,
-        created_at: {
-          gte: start_at,
-          lt: end_at
+    const [tenants, meta] = await prisma.tenant
+      .paginate({
+        where: {
+          ...queryFields,
+          ...queryTimeFields
         },
-        expired_at: {
-          gte: expire_start_at,
-          lt: expire_end_at
+        orderBy: {
+          created_at: "desc"
         }
-      },
-      orderBy: {
-        created_at: "desc"
-      }
-    }).withPages({
-      limit: Number(pageSize),
-      page: Number(current),
-      includePageCount: true
-    })
-
+      })
+      .withPages({
+        limit: Number(pageSize),
+        page: Number(current),
+        includePageCount: true
+      })
     res.json({
       status: true,
       code: 200,
       msg: "成功",
       data: {
-        list: Tenants,
+        list: tenants,
         ...meta
       }
     })
@@ -237,6 +228,59 @@ const TenantExportController = async (req, res) => {
   })
 }
 
+const DataTenantController = async (req, res) => {
+  try {
+    // 总条数
+    const total = await prisma.tenant.count()
+
+    // 今日新增
+    let start_at = dayjs().startOf("day").toISOString()
+    let end_at = dayjs().endOf("day").toISOString()
+    const todayNum = await prisma.tenant.count({
+      where: {
+        created_at: {
+          gte: start_at,
+          lt: end_at
+        }
+      }
+    })
+
+    // 已跟踪
+    const completeNum = await prisma.tenant.count({
+      where: {
+        NOT: { status: "0" }
+      }
+    })
+
+    // 待跟踪
+    const waitNum = await prisma.tenant.count({
+      where: {
+        status: "0"
+      }
+    })
+
+    res.json({
+      status: true,
+      code: 200,
+      msg: "成功",
+      data: {
+        total,
+        waitNum,
+        todayNum,
+        completeNum
+      }
+    })
+  } catch (error) {
+    console.log({ error })
+    res.json({
+      status: false,
+      code: 200,
+      msg: "失败",
+      data: error
+    })
+  }
+}
+
 export {
   CreateTenantController,
   DestoryTenantController,
@@ -244,5 +288,6 @@ export {
   FindTenantController,
   FindAllTenantController,
   FindListTenantController,
-  TenantExportController
+  TenantExportController,
+  DataTenantController
 }

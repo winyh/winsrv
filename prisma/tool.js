@@ -1,3 +1,4 @@
+import dayjs from "dayjs"
 const LikeQuery = (field, query) => {
   return {
     [field]: {
@@ -20,4 +21,23 @@ const QueryContains = (fields = [], req) => {
   return queryObj
 }
 
-export { LikeQuery, QueryContains }
+const QueryTimeRange = (fields = [], req) => {
+  let queryObj = {}
+  fields.map((field) => {
+    if (field) {
+      const result = req.query[field]
+      if (result) {
+        queryObj = {
+          ...queryObj,
+          [field]: {
+            gte: dayjs(result[0]).toISOString(),
+            lt: dayjs(result[1]).toISOString()
+          }
+        }
+      }
+    }
+  })
+  return queryObj
+}
+
+export { LikeQuery, QueryContains, QueryTimeRange }

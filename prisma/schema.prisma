@@ -9,6 +9,7 @@ generator client {
 
 model tenant {
   id          Int       @id @default(autoincrement())
+  uid         String    @default(uuid())
   name        String?
   description String?
   icon        String?
