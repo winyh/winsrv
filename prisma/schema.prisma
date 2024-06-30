@@ -26,10 +26,12 @@ model admin {
   address_id Int?
   email      String   @unique
   username   String   @unique
+  nick_name  String?
   mobile     String   @unique
   password   String?
   token      String?  @db.LongText
   avator     String?
+  gender     String?  @default("0") // 0 未知，1男 2女
   sort       Int?
   status     String?  @default("0") // 0禁用，1启用
   created_at DateTime @default(now())
@@ -37,18 +39,21 @@ model admin {
 }
 
 model user {
-  id        Int     @id @default(autoincrement())
-  uid       String  @default(uuid())
-  role_id   Int?
-  email     String  @unique
-  username  String  @unique
-  nick_name String?
-  mobile    String  @unique
-  avator    String?
-  password  String?
-  token     String? @db.LongText
-  sort      Int?
-  status    String? @default("0") // 0禁用，1启用
+  id         Int      @id @default(autoincrement())
+  uid        String   @default(uuid())
+  role_id    Int?
+  email      String   @unique
+  username   String   @unique
+  nick_name  String?
+  mobile     String   @unique
+  avator     String?
+  gender     String?  @default("0") // 0 未知，1男 2女
+  password   String?
+  token      String?  @db.LongText
+  sort       Int?
+  status     String?  @default("0") // 0 禁用，1启用
+  created_at DateTime @default(now()) // 注册时间
+  updated_at DateTime @updatedAt
 }
 
 model role {
@@ -79,6 +84,46 @@ model permission {
   updated_at  DateTime @updatedAt
 }
 
+model organization {
+  id          Int      @id @default(autoincrement())
+  pid         Int?     @default(0) // 0 父id
+  name        String? // 组织名称
+  code        String? // 组织编码
+  type        String? // 组织类型
+  description String? // 组织描述
+  contacts    String? // 联系人
+  mobile      String? // 手机号
+  license     String? // 营业执照
+  address     String? // 地址
+  logo        String? // logo
+  sort        Int?
+  status      String?  @default("1") // 0 状态
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+}
+
+model department {
+  id         Int      @id @default(autoincrement())
+  name       String? // 部门名称
+  code       String? // 部门编码
+  type       String? // 部门类型
+  sort       Int?
+  status     String?  @default("1") // 0 状态
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model position {
+  id         Int      @id @default(autoincrement())
+  sort       Int?
+  code       String? // 岗位编码
+  name       String? // 岗位名称
+  type       String? // 岗位类型
+  status     String?  @default("1") // 0 状态
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
 model menu {
   id                 Int      @id @default(autoincrement())
   pid                Int?     @default(0) // 父级id
@@ -96,6 +141,17 @@ model menu {
   status             String?  @default("1") // 0 状态
   created_at         DateTime @default(now())
   updated_at         DateTime @updatedAt
+}
+
+// 资源
+model resource {
+  id         Int      @id @default(autoincrement())
+  uid        String   @default(uuid())
+  code       String? // 资源唯一编码
+  type       String? // 资源类型
+  status     String?  @default("1") // 0 状态
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 }
 
 model role_menu {
